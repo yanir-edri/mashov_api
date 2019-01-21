@@ -1,0 +1,11 @@
+.dart_tool/
+.packages
+.pub/
+pubspec.lock
+build/
+doc/api/
+*.iml
+*.ipr
+*.iws
+.idea/
+.DS_Store
