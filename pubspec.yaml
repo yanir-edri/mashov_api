@@ -1,8 +1,8 @@
 name: mashov_api
 description: The Mashov API - for Flutter
-version: 0.0.1
-author:
-homepage:
+version: 0.0.
+author: Yanir Edri <yanir.edri1@gmail.com>
+homepage: https://github.com/yanir-edri/mashov_api
 
 environment:
   sdk: ">=2.0.0-dev.68.0 <3.0.0"

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:http/http.dart' as http;
 import 'package:mashov_api/src/controller/cookie_manager.dart';
 import 'package:mashov_api/src/controller/request_controller.dart';
 import 'package:mashov_api/src/models/behave_event.dart';
@@ -17,7 +18,6 @@ import 'package:mashov_api/src/models/messages_count.dart';
 import 'package:mashov_api/src/models/result.dart';
 import 'package:mashov_api/src/models/school.dart';
 import 'package:mashov_api/src/utils.dart';
-import 'package:http/http.dart' as http;
 
 typedef Parser<E> = E Function(Map<String, dynamic> src);
 
@@ -62,7 +62,7 @@ class ApiController {
         processResponse(response);
         return Result(
             exception: null, value: Login.fromJson(json.decode(response.body)));
-      });
+      }).catchError((e) => Result(exception: e, value: null));
     } catch (e) {
       return Result(exception: e, value: null);
     }
@@ -188,8 +188,8 @@ class ApiController {
   Result<List<E>> parseListResponse<E>(http.Response response, Parser parser) {
     try {
       List src = json.decode(response.body);
-      Result<List<E>> result = Result(
-          exception: null, value: src.map<E>((e) => parser(e)).toList());
+      Result<List<E>> result =
+      Result(exception: null, value: src.map<E>((e) => parser(e)).toList());
       return result;
     } catch (e) {
       return Result(exception: e, value: null);
