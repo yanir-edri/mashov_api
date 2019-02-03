@@ -1,4 +1,4 @@
-import 'package:mashov_api/src/models/attachment.dart';
+import 'package:mashov_api/src/models.dart';
 
 
 ///Some nice utility functions

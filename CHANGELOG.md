@@ -6,3 +6,5 @@ Fixed unhandled exception on login
 Added Bagrut grades and Hatamot APIs.
 ## 0.0.4
 Added Api enum and Data Processor to Api Controller.
+## 0.0.5
+put all models file in one file, and by doing this exported another two models that were not exported in version 0.0.4
