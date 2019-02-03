@@ -60,8 +60,11 @@ class ApiController {
           .post(_loginUrl, headers, json.encode(body))
           .then((response) {
         processResponse(response);
+
+        Login login = Login.fromJson(json.decode(response.body));
+        login.statusCode = response.statusCode;
         return Result(
-            exception: null, value: Login.fromJson(json.decode(response.body)));
+            exception: null, value: login);
       }).catchError((e) => Result(exception: e, value: null));
     } catch (e) {
       return Result(exception: e, value: null);

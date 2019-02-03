@@ -98,18 +98,13 @@ class LoginData {
 }
 
 class Login {
-  Login({this.data, this.students});
+  Login({this.statusCode, this.data, this.students});
 
+  int statusCode;
   LoginData data;
   List<Student> students;
 
   factory Login.fromJson(Map<String, dynamic> src) {
-    print("printing from login from json");
-    for (MapEntry<String, dynamic> entry in src.entries) {
-      print(
-          "entry with key ${entry.key} is ${entry.value}, and ${entry.value.toString()}");
-    }
-
     var credential = src["credential"];
     var token = src["accessToken"];
     if (token != null) {
@@ -118,11 +113,20 @@ class Login {
       List<Student> st = children.map((student) {
         return Student.fromJson(student as Map<String, dynamic>);
       }).toList();
-      return Login(data: data, students: st);
+      return Login(data: data, students: st, statusCode: 200);
     } else {
       throw Exception("token is null");
     }
   }
+
+  bool get isUnauthorized => statusCode == 401;
+
+  bool get isInternalServerError => statusCode == 500;
+
+  bool get isNeedToLogin => isUnauthorized || isInternalServerError;
+
+  bool get isForbidden => statusCode == 403;
+
 
   static listToStringsList(List list) {
     List<String> strings = new List(list.length);
