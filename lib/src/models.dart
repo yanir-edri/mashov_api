@@ -6,11 +6,27 @@ import 'package:mashov_api/src/utils.dart';
 class Result<E> {
   dynamic exception;
   E value;
+  int _statusCode;
 
-  Result({this.exception, this.value});
+  int get statusCode => _statusCode;
+
+  Result({this.exception, this.value, int statusCode}) {
+    _statusCode = statusCode;
+  }
 
   //Returns true if value can be used, false otherwise.
-  bool get isSuccess => exception == null && value != null;
+  bool get isSuccess => exception == null && value != null && isOk;
+
+  bool get isUnauthorized => statusCode == 401;
+
+  bool get isInternalServerError => statusCode == 500;
+
+  bool get isNeedToLogin => isUnauthorized || isInternalServerError;
+
+  bool get isForbidden => statusCode == 403;
+
+  bool get isOk => statusCode == 200;
+
 }
 
 //login
@@ -98,9 +114,8 @@ class LoginData {
 }
 
 class Login {
-  Login({this.statusCode, this.data, this.students});
+  Login({this.data, this.students});
 
-  int statusCode;
   LoginData data;
   List<Student> students;
 
@@ -113,19 +128,12 @@ class Login {
       List<Student> st = children.map((student) {
         return Student.fromJson(student as Map<String, dynamic>);
       }).toList();
-      return Login(data: data, students: st, statusCode: 200);
+      return Login(data: data, students: st);
     } else {
       throw Exception("token is null");
     }
   }
 
-  bool get isUnauthorized => statusCode == 401;
-
-  bool get isInternalServerError => statusCode == 500;
-
-  bool get isNeedToLogin => isUnauthorized || isInternalServerError;
-
-  bool get isForbidden => statusCode == 403;
 
 
   static listToStringsList(List list) {

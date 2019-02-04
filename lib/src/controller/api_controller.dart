@@ -59,15 +59,17 @@ class ApiController {
       return _requestController
           .post(_loginUrl, headers, json.encode(body))
           .then((response) {
+        if (response.statusCode != 200) {
+          return Result(
+              exception: null, value: null, statusCode: response.statusCode);
+        }
         processResponse(response);
-
         Login login = Login.fromJson(json.decode(response.body));
-        login.statusCode = response.statusCode;
         return Result(
-            exception: null, value: login);
-      }).catchError((e) => Result(exception: e, value: null));
+            exception: null, value: login, statusCode: response.statusCode);
+      }).catchError((e) => Result(exception: e, value: null, statusCode: -1));
     } catch (e) {
-      return Result(exception: e, value: null);
+      return Result(exception: e, value: null, statusCode: -1);
     }
   }
 
@@ -200,10 +202,11 @@ class ApiController {
   Result<E> _parseResponse<E>(http.Response response, Parser parser) {
     try {
       Map<String, dynamic> src = json.decode(response.body);
-      Result<E> result = Result(exception: null, value: parser(src));
+      Result<E> result = Result(
+          exception: null, value: parser(src), statusCode: response.statusCode);
       return result;
     } catch (e) {
-      return Result(exception: e, value: null);
+      return Result(exception: e, value: null, statusCode: response.statusCode);
     }
   }
 
@@ -211,10 +214,12 @@ class ApiController {
     try {
       List src = json.decode(response.body);
       Result<List<E>> result =
-      Result(exception: null, value: src.map<E>((e) => parser(e)).toList());
+      Result(exception: null,
+          value: src.map<E>((e) => parser(e)).toList(),
+          statusCode: response.statusCode);
       return result;
     } catch (e) {
-      return Result(exception: e, value: null);
+      return Result(exception: e, value: null, statusCode: response.statusCode);
     }
   }
 
