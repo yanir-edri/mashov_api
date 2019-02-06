@@ -308,7 +308,17 @@ class ApiController {
 
   dynamic _process(dynamic data, Api api) {
     if (_dataProcessor != null) {
-      _dataProcessor(data, api);
+      if (data is Future<Result>) {
+        data.then((result) {
+          if (result.isSuccess) {
+            _dataProcessor(result.value, api);
+          }
+        });
+      } else {
+        print(
+            "Api controller data proccessor recieved data which is not of type Future<Result>");
+        _dataProcessor(data, api);
+      }
     }
     return data;
   }
