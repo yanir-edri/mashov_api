@@ -177,14 +177,29 @@ class MessageTitle {
       messageId: Utils.string(src["messageId"]),
       subject: Utils.string(src["subject"]),
       senderName: Utils.string(src["senderName"]),
-      sendDate: Utils.date(src["sendTime"]),
+      sendDate: DateTime.parse(src["sendTime"]),
       isNew: Utils.boolean(src["isNew"]),
       hasAttachment: Utils.boolean(src["hasAttachments"]));
+
+//  String toJson() {
+//    return """{
+//    "messageId": "$messageId",
+//    "subject": "$subject",
+//    "senderName": "$senderName",
+//    "sendTime": "${sendDate.toIso8601String().split(".").first}",
+//    "isNew": $isNew,
+//    "hasAttachments": $hasAttachment
+//    }""";
+//  }
+
 
   @override
   String toString() {
     return super.toString() +
-        " => { $messageId, $subject, $senderName, ${sendDate.toIso8601String()}, $isNew, $hasAttachment";
+        " => { $messageId, $subject, $senderName, ${sendDate
+            .toIso8601String()
+            .split(".")
+            .first}, $isNew, $hasAttachment";
   }
 }
 
@@ -208,7 +223,7 @@ class Message {
     print("attachments is of type ${src["files"].runtimeType}");
     return Message(
         messageId: Utils.string(src["messageId"]),
-        sendDate: Utils.date(src["sendTime"]),
+        sendDate: DateTime.parse(src["sendTime"]),
         subject: Utils.string(src["subject"]),
         body: Utils.string(src["body"]),
         sender: Utils.string(src["senderName"]),
@@ -315,7 +330,7 @@ class BehaveEvent {
   static BehaveEvent fromJson(Map<String, dynamic> src) => BehaveEvent(
       groupId: Utils.Int(src["groupId"]),
       lesson: Utils.Int(src["lesson"]),
-      date: Utils.date(src["lessonDate"]),
+      date: DateTime.parse(src["lessonDate"]),
       type: Utils.Int(src["lessonType"]),
       text: Utils.string(src["achvaName"]),
       justificationId: Utils.Int(src["justificationId"]),
@@ -381,7 +396,7 @@ class Grade {
         teacher: Utils.string(src["teacherName"]),
         groupId: Utils.Int(src["groupId"]),
         subject: Utils.string(src["subjectName"]),
-        eventDate: Utils.date(src["eventDate"]),
+        eventDate: DateTime.parse(src["eventDate"]),
         event: Utils.string(src["gradingEvent"]),
         type: Utils.Int(src["gradeTypeId"]),
         grade: Utils.Int(src["grade"]));
@@ -460,7 +475,7 @@ class Homework {
 
   static Homework fromJson(Map<String, dynamic> src) => Homework(
       message: Utils.string(src["homework"]),
-      date: Utils.date(src["lessonDate"]),
+      date: DateTime.parse(src["lessonDate"]),
       subject: Utils.string(src["subjectName"]));
 }
 
@@ -473,7 +488,7 @@ class Maakav {
 
   static Maakav fromJson(Map<String, dynamic> src) => Maakav(
       id: Utils.Int(src["maakavId"]).toString(),
-      date: Utils.date(src["maakavDate"]),
+      date: DateTime.parse(src["maakavDate"]),
       message: Utils.string(src["message"]),
       reporter: Utils.string(src["reporterName"]),
       attachments: Utils.attachments(src["filesMetadata"]));

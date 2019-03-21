@@ -9,11 +9,13 @@ import 'package:mashov_api/src/utils.dart';
 
 typedef Parser<E> = E Function(Map<String, dynamic> src);
 typedef DataProcessor = void Function(dynamic data, Api api);
+typedef RawDataProcessor = void Function(String json, Api api);
 
 class ApiController {
   CookieManager _cookieManager;
   RequestController _requestController;
   DataProcessor _dataProcessor;
+  RawDataProcessor _rawDataProcessor;
 
   detachDataProcessor() {
     _dataProcessor = null;
@@ -25,15 +27,27 @@ class ApiController {
     }
   }
 
+  detachRawDataProcessor() {
+    _rawDataProcessor = null;
+  }
+
+  attachRawDataProcessor(RawDataProcessor processor) {
+    if (processor != null) {
+      _rawDataProcessor = processor;
+    }
+  }
+
   ApiController(CookieManager manager, RequestController controller) {
     _setJsonHeader();
     _cookieManager = manager;
     _requestController = controller;
+    _rawDataProcessor = null;
+    _dataProcessor = null;
   }
 
   ///returns a list of schools.
   Future<Result<List<School>>> getSchools() =>
-      _authList(_schoolsUrl, School.fromJson);
+      _authList(_schoolsUrl, School.fromJson, Api.Schools);
 
   ///logs in to the Mashov API.
   Future<Result<Login>> login(
@@ -76,65 +90,77 @@ class ApiController {
   ///Returns a list of grades.
   Future<Result<List<Grade>>> getGrades(String userId) =>
       _process(
-          _authList<Grade>(_gradesUrl(userId), Grade.fromJson), Api.Grades);
+          _authList<Grade>(_gradesUrl(userId), Grade.fromJson, Api.Grades),
+          Api.Grades);
 
   ///Returns a list of behave events.
   Future<Result<List<BehaveEvent>>> getBehaveEvents(String userId) =>
       _process(
-          _authList<BehaveEvent>(_behaveUrl(userId), BehaveEvent.fromJson),
+          _authList<BehaveEvent>(
+              _behaveUrl(userId), BehaveEvent.fromJson, Api.BehaveEvents),
           Api.BehaveEvents);
 
   ////Returns the messages count - all, inbox, new and unread.
   Future<Result<MessagesCount>> getMessagesCount() =>
       _process(
-          _auth(_messagesCountUrl, MessagesCount.fromJson), Api.MessagesCount);
+          _auth(_messagesCountUrl, MessagesCount.fromJson, Api.MessagesCount),
+          Api.MessagesCount);
 
   ///Returns a list of conversations.
   Future<Result<List<Conversation>>> getMessages(int skip) =>
       _process(
-          _authList(_messagesUrl(skip), Conversation.fromJson), Api.Messages);
+          _authList(_messagesUrl(skip), Conversation.fromJson, Api.Messages),
+          Api.Messages);
 
   ///Returns a specific message.
   Future<Result<Message>> getMessage(String messageId) =>
-      _process(_auth(_messageUrl(messageId), Message.fromJson), Api.Message);
+      _process(_auth(_messageUrl(messageId), Message.fromJson, Api.Message),
+          Api.Message);
 
   ///Returns the user timetable.
   Future<Result<List<Lesson>>> getTimeTable(String userId) =>
       _process(
-          _authList(_timetableUrl(userId), Lesson.fromJson), Api.Timetable);
+          _authList(_timetableUrl(userId), Lesson.fromJson, Api.Timetable),
+          Api.Timetable);
 
   ///Returns a list of the Alfon Groups.
   ///The class group is a different address, so we use an id -1 to access it.
   Future<Result<List<Group>>> getGroups(String userId) =>
       _process(
-          _authList(_groupsUrl(userId), Group.fromJson).then((groups) {
-        groups.value.add(Group(id: -1, teacher: "", subject: "כיתה"));
-        return groups;
+          _authList(_groupsUrl(userId), Group.fromJson, Api.Groups).then((
+              groups) {
+            groups.value.add(Group(id: -1, teacher: "", subject: "כיתה"));
+            return groups;
           }),
           Api.Groups);
 
   ///returns an Alfon Group contacts.
   Future<Result<List<Contact>>> getContacts(String userId, String groupId) =>
       _process(
-          _authList(_alfonUrl(userId, groupId), Contact.fromJson), Api.Alfon);
+          _authList(_alfonUrl(userId, groupId), Contact.fromJson, Api.Alfon),
+          Api.Alfon);
 
   ///Returns a list of Maakav reports.
   Future<Result<List<Maakav>>> getMaakav(String userId) =>
-      _process(_authList(_maakavUrl(userId), Maakav.fromJson), Api.Maakav);
+      _process(_authList(_maakavUrl(userId), Maakav.fromJson, Api.Maakav),
+          Api.Maakav);
 
   ///Returns a list of homework.
   Future<Result<List<Homework>>> getHomework(String userId) =>
       _process(
-          _authList(_homeworkUrl(userId), Homework.fromJson), Api.Homework);
+          _authList(_homeworkUrl(userId), Homework.fromJson, Api.Homework),
+          Api.Homework);
 
   ///Returns a list of bagrut grades.
   Future<Result<List<BagrutGrade>>> getBagrutGrades(String userId) =>
-      _process(_authList(_bagrutGradesUrl(userId), BagrutGrade.fromJson),
+      _process(_authList(
+          _bagrutGradesUrl(userId), BagrutGrade.fromJson, Api.BagrutGrades),
           Api.BagrutGrades);
 
   //Returns the user's hatamot.
   Future<Result<List<Hatama>>> getHatamot(String userId) =>
-      _process(_authList(_hatamotUrl(userId), Hatama.fromJson), Api.Hatamot);
+      _process(_authList(_hatamotUrl(userId), Hatama.fromJson, Api.Hatamot),
+          Api.Hatamot);
 
   ///Returns the user profile.
   Future<File> getPicture(String userId, File file) {
@@ -178,7 +204,8 @@ class ApiController {
   }
 
   ///Returns a list of E, using an authenticated request.
-  Future<Result<List<E>>> _authList<E>(String url, Parser<E> parser) async {
+  Future<Result<List<E>>> _authList<E>(String url, Parser<E> parser,
+      Api api) async {
     Map<String, String> headers = jsonHeader;
     if (url != _schoolsUrl) {
       /// we don't need authentication when getting schools.
@@ -186,37 +213,46 @@ class ApiController {
     }
     return _requestController
         .get(url, headers)
-        .then((response) => _parseListResponse(response, parser));
+        .then((response) => _parseListResponse(response, parser, api));
     //.then((body) => body.map<E>((e) => parser(e)).toList());
   }
 
   ///Returns E, using an authenticated request.
-  Future<Result<E>> _auth<E>(String url, Parser parser) async {
+  Future<Result<E>> _auth<E>(String url, Parser parser, Api api) async {
     Map<String, String> headers = jsonHeader;
     headers.addAll(_authHeader());
     return _requestController
         .get(url, headers)
-        .then((response) => _parseResponse(response, parser));
+        .then((response) => _parseResponse(response, parser, api));
   }
 
-  Result<E> _parseResponse<E>(http.Response response, Parser parser) {
+  Result<E> _parseResponse<E>(http.Response response, Parser parser, Api api) {
     try {
       Map<String, dynamic> src = json.decode(response.body);
       Result<E> result = Result(
           exception: null, value: parser(src), statusCode: response.statusCode);
+      //if it had not crashed, we know the data is good.
+      if (_rawDataProcessor != null) {
+        _rawDataProcessor(response.body, api);
+      }
       return result;
     } catch (e) {
       return Result(exception: e, value: null, statusCode: response.statusCode);
     }
   }
 
-  Result<List<E>> _parseListResponse<E>(http.Response response, Parser parser) {
+  Result<List<E>> _parseListResponse<E>(http.Response response, Parser parser,
+      Api api) {
     try {
       List src = json.decode(response.body);
       Result<List<E>> result =
       Result(exception: null,
           value: src.map<E>((e) => parser(e)).toList(),
           statusCode: response.statusCode);
+      //if it had not crashed, we know the data is good.
+      if (_rawDataProcessor != null) {
+        _rawDataProcessor(response.body, api);
+      }
       return result;
     } catch (e) {
       return Result(exception: e, value: null, statusCode: response.statusCode);
@@ -235,7 +271,8 @@ class ApiController {
     ///I...I really don't know why they named it that way.
     ///just... go on
     headers["cookie"] =
-        "uniquId=${_cookieManager.uniqueId}; MashovSessionID=${_cookieManager.mashovSessionId}; Csrf-Token=${_cookieManager.csrfToken}";
+    "uniquId=${_cookieManager.uniqueId}; MashovSessionID=${_cookieManager
+        .mashovSessionId}; Csrf-Token=${_cookieManager.csrfToken}";
     headers["x-csrf-token"] = _cookieManager.csrfToken;
     return headers;
   }
@@ -247,7 +284,7 @@ class ApiController {
   }
 
   Map<String, String> jsonHeader;
-  static const String _baseUrl = "https://svc.mashov.info/api/";
+  static const String _baseUrl = "https://web.mashov.info/api/";
   static const String _schoolsUrl = _baseUrl + "schools";
   static const String _loginUrl = _baseUrl + "login";
   static const String _messagesCountUrl = _baseUrl + "mail/counts";
@@ -299,7 +336,7 @@ class ApiController {
 
   static const String _logoutUrl = _baseUrl + "logout";
 
-  static const String _ApiVersion = "3.20181205";
+  static const String _ApiVersion = "3.20190301";
 
   _setJsonHeader() {
     jsonHeader = new Map<String, String>();
@@ -311,6 +348,8 @@ class ApiController {
       if (data is Future<Result>) {
         data.then((result) {
           if (result.isSuccess) {
+            print(
+                "result was successful in process: ${result.value.toString()}");
             _dataProcessor(result.value, api);
           }
         });

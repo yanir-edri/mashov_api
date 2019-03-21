@@ -3,9 +3,6 @@ import 'package:mashov_api/src/models.dart';
 
 ///Some nice utility functions
 class Utils {
-  ///Takes a mashov-formatted date and parses it - simply replaces that 'T' in the middle.
-  static DateTime date(String src) => DateTime.parse(src.replaceAll('T', ' '));
-
 
   ///Returns an empty string if value is null, the value itself otherwise.
   static String string(String value) => value == null ? "" : value;
