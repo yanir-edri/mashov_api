@@ -26,7 +26,6 @@ class Result<E> {
   bool get isForbidden => statusCode == 403;
 
   bool get isOk => statusCode == 200;
-
 }
 
 //login
@@ -51,29 +50,22 @@ class School {
 }
 
 class Student {
-  Student(
-      {this.id,
-      this.familyName,
-      this.privateName,
-      this.classCode,
-      this.classNum});
+  Student({this.id, this.displayName, this.classStr});
 
-  String id, familyName, privateName, classCode;
-  int classNum;
+  String id, displayName, classStr;
 
-  factory Student.fromJson(Map<String, dynamic> json) => Student(
-      id: json['childGuid'],
-      familyName: json['familyName'],
-      privateName: json['privateName'],
-      classCode: json['classCode'],
-      classNum: json['classNum']);
+  factory Student.fromJson(Map<String, dynamic> json) {
+    String display = json["displayName"];
+    List<String> words = display.split(" ");
+    String classStr = words.removeLast();
+    String name = words.join(" ");
+    return Student(
+        id: json['childGuid'], displayName: name, classStr: classStr);
+  }
 
   Map<String, dynamic> toJson() => {
         'childGuid': id,
-        'familyName': familyName,
-        'privateName': privateName,
-        'classCode': classCode,
-        'classNum': classNum
+    'displayName': "$displayName $classStr"
       };
 }
 
@@ -134,8 +126,6 @@ class Login {
     }
   }
 
-
-
   static listToStringsList(List list) {
     List<String> strings = new List(list.length);
     for (int i = 0; i < list.length; i++) {
@@ -191,7 +181,6 @@ class MessageTitle {
 //    "hasAttachments": $hasAttachment
 //    }""";
 //  }
-
 
   @override
   String toString() {
@@ -349,6 +338,7 @@ class Lesson {
   int groupId, day, hour;
   String subject, room;
   List<String> teachers;
+
   Lesson(
       {this.groupId,
       this.day,
@@ -367,8 +357,11 @@ class Lesson {
         day: Utils.Int(tableDataNull ? null : tableData["day"]),
         hour: Utils.Int(tableDataNull ? null : tableData["lesson"]),
         subject: Utils.string(detailsNull ? null : details["subjectName"]),
-        teachers: detailsNull ? null : details["groupTeachers"].map<String>((
-            t) => "${t["teacherName"]}").toList(),
+        teachers: detailsNull
+            ? null
+            : details["groupTeachers"]
+            .map<String>((t) => "${t["teacherName"]}")
+            .toList(),
         room: Utils.string(tableDataNull ? null : tableData["roomNum"]));
   }
 
