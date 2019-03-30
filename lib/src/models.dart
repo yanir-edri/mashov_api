@@ -347,14 +347,14 @@ class BehaveEvent {
 
 class Lesson {
   int groupId, day, hour;
-  String subject, teacher, room;
-
+  String subject, room;
+  List<String> teachers;
   Lesson(
       {this.groupId,
       this.day,
       this.hour,
       this.subject,
-      this.teacher,
+        this.teachers,
       this.room});
 
   static Lesson fromJson(Map<String, dynamic> src) {
@@ -367,14 +367,16 @@ class Lesson {
         day: Utils.Int(tableDataNull ? null : tableData["day"]),
         hour: Utils.Int(tableDataNull ? null : tableData["lesson"]),
         subject: Utils.string(detailsNull ? null : details["subjectName"]),
-        teacher: Utils.string(detailsNull ? null : details["teacherName"]),
+        teachers: detailsNull ? null : details["groupTeachers"].map<String>((
+            t) => "${t["teacherName"]}").toList(),
         room: Utils.string(tableDataNull ? null : tableData["roomNum"]));
   }
 
   @override
   String toString() =>
       super.toString() +
-      " => { $groupId, $day, $hour, $subject, $teacher, $room }";
+          " => { $groupId, $day, $hour, $subject, ${teachers.join(
+              ", ")}, $room }";
 }
 
 class Grade {

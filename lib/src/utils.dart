@@ -5,13 +5,13 @@ import 'package:mashov_api/src/models.dart';
 class Utils {
 
   ///Returns an empty string if value is null, the value itself otherwise.
-  static String string(String value) => value == null ? "" : value;
+  static String string(String value) => value ?? "";
 
   ///Returns 0 if value is null, the value itself otherwise.
-  static int Int(int value) => value == null ? 0 : value;
+  static int Int(int value) => value ?? 0;
 
   ///Returns false if value is null, the value itself otherwise.
-  static bool boolean(bool value) => value == null ? false : value;
+  static bool boolean(bool value) => value ?? false;
 
   ///Parses a list of attachments.
   static List<Attachment> attachments(List src) =>
