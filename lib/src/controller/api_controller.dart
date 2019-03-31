@@ -78,6 +78,10 @@ class ApiController {
               exception: null, value: null, statusCode: response.statusCode);
         }
         processResponse(response);
+        print("login response body is\n");
+        print(response.body);
+        print("\n");
+        print("status code is ${response.statusCode}");
         Login login = Login.fromJson(json.decode(response.body));
         return Result(
             exception: null, value: login, statusCode: response.statusCode);
@@ -280,6 +284,7 @@ class ApiController {
   Map<String, String> _loginHeader() {
     Map<String, String> headers = new Map();
     headers["x-csrf-token"] = _cookieManager.csrfToken;
+    headers["accept-encoding"] = "gzip";
     return headers;
   }
 
@@ -340,7 +345,9 @@ class ApiController {
 
   _setJsonHeader() {
     jsonHeader = new Map<String, String>();
-    jsonHeader["Content-Type"] = "application/json;charset=UTF-8";
+    jsonHeader["content-type"] = "application/json;charset=UTF-8";
+    jsonHeader["accept"] = "application/json, text/plain, */*";
+    jsonHeader["accept-language"] = "en-US,en;q=0.9;he;q=0.8";
   }
 
   dynamic _process(dynamic data, Api api) {

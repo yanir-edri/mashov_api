@@ -26,6 +26,7 @@ class Result<E> {
   bool get isForbidden => statusCode == 403;
 
   bool get isOk => statusCode == 200;
+
 }
 
 //login
@@ -50,35 +51,42 @@ class School {
 }
 
 class Student {
-  Student({this.id, this.displayName, this.classStr});
+  Student({this.id,
+    this.familyName,
+    this.privateName,
+    this.classCode,
+    this.classNum});
 
-  String id, displayName, classStr;
+  String id, familyName, privateName, classCode;
+  int classNum;
 
-  factory Student.fromJson(Map<String, dynamic> json) {
-    String display = json["displayName"];
-    List<String> words = display.split(" ");
-    String classStr = words.removeLast();
-    String name = words.join(" ");
-    return Student(
-        id: json['childGuid'], displayName: name, classStr: classStr);
-  }
+  factory Student.fromJson(Map<String, dynamic> json) =>
+      Student(
+          id: json['childGuid'],
+          familyName: json['familyName'],
+          privateName: json['privateName'],
+          classCode: json['classCode'],
+          classNum: json['classNum']);
 
   Map<String, dynamic> toJson() => {
-        'childGuid': id,
-    'displayName': "$displayName $classStr"
-      };
+    'childGuid': id,
+    'familyName': familyName,
+    'privateName': privateName,
+    'classCode': classCode,
+    'classNum': classNum
+  };
 }
 
 class LoginData {
   LoginData(
       {this.sessionId,
-      this.userId,
-      this.id,
-      this.userType,
-      this.schoolUserType,
-      this.schoolId,
-      this.year,
-      this.correlationId});
+        this.userId,
+        this.id,
+        this.userType,
+        this.schoolUserType,
+        this.schoolId,
+        this.year,
+        this.correlationId});
 
   String sessionId, userId, id, correlationId;
   int userType, schoolUserType, schoolId, year;
@@ -94,15 +102,15 @@ class LoginData {
       correlationId: json['correlationId']);
 
   Map<String, dynamic> toJson() => {
-        'sessionId': '',
-        'userId': userId,
-        'id': id,
-        'userType': userType,
-        'schoolUserType': schoolUserType,
-        'schoolId': schoolId,
-        'year': year,
-        'correlationId': correlationId
-      };
+    'sessionId': '',
+    'userId': userId,
+    'id': id,
+    'userType': userType,
+    'schoolUserType': schoolUserType,
+    'schoolId': schoolId,
+    'year': year,
+    'correlationId': correlationId
+  };
 }
 
 class Login {
@@ -125,6 +133,7 @@ class Login {
       throw Exception("token is null");
     }
   }
+
 
   static listToStringsList(List list) {
     List<String> strings = new List(list.length);
@@ -157,11 +166,11 @@ class MessageTitle {
 
   MessageTitle(
       {this.messageId,
-      this.subject,
-      this.senderName,
-      this.sendDate,
-      this.isNew,
-      this.hasAttachment});
+        this.subject,
+        this.senderName,
+        this.sendDate,
+        this.isNew,
+        this.hasAttachment});
 
   static MessageTitle fromJson(Map<String, dynamic> src) => MessageTitle(
       messageId: Utils.string(src["messageId"]),
@@ -181,6 +190,7 @@ class MessageTitle {
 //    "hasAttachments": $hasAttachment
 //    }""";
 //  }
+
 
   @override
   String toString() {
@@ -202,11 +212,11 @@ class Message {
 
   Message(
       {this.messageId,
-      this.sendDate,
-      this.subject,
-      this.body,
-      this.sender,
-      this.attachments});
+        this.sendDate,
+        this.subject,
+        this.body,
+        this.sender,
+        this.attachments});
 
   static Message fromJson(Map<String, dynamic> src) {
     print("attachments is of type ${src["files"].runtimeType}");
@@ -235,12 +245,12 @@ class Conversation {
 
   Conversation(
       {this.conversationId,
-      this.subject,
-      this.sendTime,
-      this.messages,
-      this.preventReply,
-      this.isNew,
-      this.hasAttachments});
+        this.subject,
+        this.sendTime,
+        this.messages,
+        this.preventReply,
+        this.isNew,
+        this.hasAttachments});
 
   static Conversation fromJson(Map<String, dynamic> src) => Conversation(
       conversationId: Utils.string(src["conversationId"]),
@@ -258,9 +268,9 @@ class MessagesCount {
 
   MessagesCount(
       {this.allMessages,
-      this.inboxMessages,
-      this.newMessages,
-      this.unreadMessages});
+        this.inboxMessages,
+        this.newMessages,
+        this.unreadMessages});
 
   static MessagesCount fromJson(Map<String, dynamic> src) => MessagesCount(
       allMessages: Utils.Int(src["allMessages"]),
@@ -285,11 +295,11 @@ class BagrutGrade {
 
   BagrutGrade(
       {this.semel,
-      this.name,
-      this.date,
-      this.finalGrade,
-      this.yearGrade,
-      this.testGrade});
+        this.name,
+        this.date,
+        this.finalGrade,
+        this.yearGrade,
+        this.testGrade});
 
   static BagrutGrade fromJson(Map<String, dynamic> src) => BagrutGrade(
       semel: Utils.Int(src["semel"]).toString(),
@@ -307,14 +317,14 @@ class BehaveEvent {
 
   BehaveEvent(
       {this.groupId,
-      this.lesson,
-      this.date,
-      this.type,
-      this.text,
-      this.justificationId,
-      this.justification,
-      this.reporter,
-      this.subject});
+        this.lesson,
+        this.date,
+        this.type,
+        this.text,
+        this.justificationId,
+        this.justification,
+        this.reporter,
+        this.subject});
 
   static BehaveEvent fromJson(Map<String, dynamic> src) => BehaveEvent(
       groupId: Utils.Int(src["groupId"]),
@@ -338,14 +348,13 @@ class Lesson {
   int groupId, day, hour;
   String subject, room;
   List<String> teachers;
-
   Lesson(
       {this.groupId,
-      this.day,
-      this.hour,
-      this.subject,
+        this.day,
+        this.hour,
+        this.subject,
         this.teachers,
-      this.room});
+        this.room});
 
   static Lesson fromJson(Map<String, dynamic> src) {
     var tableData = src["timeTable"];
@@ -357,11 +366,8 @@ class Lesson {
         day: Utils.Int(tableDataNull ? null : tableData["day"]),
         hour: Utils.Int(tableDataNull ? null : tableData["lesson"]),
         subject: Utils.string(detailsNull ? null : details["subjectName"]),
-        teachers: detailsNull
-            ? null
-            : details["groupTeachers"]
-            .map<String>((t) => "${t["teacherName"]}")
-            .toList(),
+        teachers: detailsNull ? null : details["groupTeachers"].map<String>((
+            t) => "${t["teacherName"]}").toList(),
         room: Utils.string(tableDataNull ? null : tableData["roomNum"]));
   }
 
@@ -379,12 +385,12 @@ class Grade {
 
   Grade(
       {this.teacher,
-      this.groupId,
-      this.subject,
-      this.eventDate,
-      this.event,
-      this.type,
-      this.grade});
+        this.groupId,
+        this.subject,
+        this.eventDate,
+        this.event,
+        this.type,
+        this.grade});
 
   static Grade fromJson(Map<String, dynamic> src) {
     return Grade(
@@ -421,9 +427,9 @@ class Group {
   @override
   String toString() =>
       super.toString() +
-      " => { id: $id, $subject" +
-      (teacher.isNotEmpty ? " - $teacher " : "") +
-      " }";
+          " => { id: $id, $subject" +
+          (teacher.isNotEmpty ? " - $teacher " : "") +
+          " }";
 
   String format() => "$subject" + (teacher.isNotEmpty ? " - $teacher " : "");
 }
