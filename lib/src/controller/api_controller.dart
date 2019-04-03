@@ -78,11 +78,8 @@ class ApiController {
               exception: null, value: null, statusCode: response.statusCode);
         }
         processResponse(response);
-        print("login response body is\n");
-        print(response.body);
-        print("\n");
-        print("status code is ${response.statusCode}");
-        Login login = Login.fromJson(json.decode(response.body));
+        Login login = Login.fromJson(
+            json.decode(utf8.decode(response.bodyBytes)));
         return Result(
             exception: null, value: login, statusCode: response.statusCode);
       }).catchError((e) => Result(exception: e, value: null, statusCode: -1));
@@ -355,8 +352,8 @@ class ApiController {
       if (data is Future<Result>) {
         data.then((result) {
           if (result.isSuccess) {
-            print(
-                "result was successful in process: ${result.value.toString()}");
+//            print(
+//                "result was successful in process: ${result.value.toString()}");
             _dataProcessor(result.value, api);
           }
         });

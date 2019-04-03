@@ -75,6 +75,9 @@ class Student {
     'classCode': classCode,
     'classNum': classNum
   };
+
+  String toString() =>
+      "Student(id=$id,privateName=\"$privateName\",familyName=\"$familyName\",classCode=\'$classCode\',classNum=\'$classNum\'";
 }
 
 class LoginData {
