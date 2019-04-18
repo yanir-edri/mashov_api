@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -50,8 +51,7 @@ class ApiController {
       _authList(_schoolsUrl, School.fromJson, Api.Schools);
 
   ///logs in to the Mashov API.
-  Future<Result<Login>> login(
-      School school, String id, String password, int year) async {
+  Future<Result<Login>> login(School school, String id, String password, int year) async {
     var body = {
       "school": {
         "semel": school.id,
@@ -105,7 +105,10 @@ class ApiController {
   Future<Result<MessagesCount>> getMessagesCount() =>
       _process(
           _auth(_messagesCountUrl, MessagesCount.fromJson, Api.MessagesCount),
-          Api.MessagesCount);
+          Api.MessagesCount).then((r) =>
+          Result(exception: r.exception,
+              statusCode: r.statusCode,
+              value: r.value == null ? null : r.value as MessagesCount));
 
   ///Returns a list of conversations.
   Future<Result<List<Conversation>>> getMessages(int skip) =>
@@ -116,7 +119,10 @@ class ApiController {
   ///Returns a specific message.
   Future<Result<Message>> getMessage(String messageId) =>
       _process(_auth(_messageUrl(messageId), Message.fromJson, Api.Message),
-          Api.Message);
+          Api.Message).then((r) =>
+          Result(exception: r.exception,
+              statusCode: r.statusCode,
+              value: r.value == null ? null : r.value as Message));
 
   ///Returns the user timetable.
   Future<Result<List<Lesson>>> getTimeTable(String userId) =>
@@ -128,8 +134,7 @@ class ApiController {
   ///The class group is a different address, so we use an id -1 to access it.
   Future<Result<List<Group>>> getGroups(String userId) =>
       _process(
-          _authList(_groupsUrl(userId), Group.fromJson, Api.Groups).then((
-              groups) {
+          _authList(_groupsUrl(userId), Group.fromJson, Api.Groups).then((groups) {
             groups.value.add(Group(id: -1, teacher: "", subject: "כיתה"));
             return groups;
           }),
@@ -347,7 +352,7 @@ class ApiController {
     jsonHeader["accept-language"] = "en-US,en;q=0.9;he;q=0.8";
   }
 
-  dynamic _process(dynamic data, Api api) {
+  Future<Result> _process(Future<Result> data, Api api) {
     if (_dataProcessor != null) {
       if (data is Future<Result>) {
         data.then((result) {
@@ -363,6 +368,11 @@ class ApiController {
         _dataProcessor(data, api);
       }
     }
+    /*if(api == Api.Message) {
+      return Future.wait(<Future>[data]).then((values) => values.first as Result<Message>);
+    } else if(api == Api.MessagesCount) {
+      return Future.wait(<Future>[data]).then((values) => values.first as Result<MessagesCount>);
+    }*/
     return data;
   }
 }
