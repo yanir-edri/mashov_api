@@ -1,8 +1,6 @@
 import 'package:mashov_api/src/controller/cookie_manager.dart';
 
 class CookieManagerImpl implements CookieManager {
-
-  @override
   String _csrfToken = "";
 
   String get csrfToken => _csrfToken;
@@ -12,7 +10,6 @@ class CookieManagerImpl implements CookieManager {
     trigger();
   }
 
-  @override
   String _mashovSessionId = "";
 
   String get mashovSessionId => _mashovSessionId;
@@ -22,7 +19,6 @@ class CookieManagerImpl implements CookieManager {
     trigger();
   }
 
-  @override
   String _uniqueId = "";
 
   String get uniqueId => _uniqueId;
@@ -31,8 +27,6 @@ class CookieManagerImpl implements CookieManager {
     _uniqueId = uniqueId;
     trigger();
   }
-
-
 
   Map<int, Function> _listeners = Map();
 
@@ -48,14 +42,16 @@ class CookieManagerImpl implements CookieManager {
 
   @override
   void processHeaders(Map<String, List<String>> headers) {
-    if(csrfToken.isNotEmpty && mashovSessionId.isNotEmpty && uniqueId.isNotEmpty) {
+    if (csrfToken.isNotEmpty &&
+        mashovSessionId.isNotEmpty &&
+        uniqueId.isNotEmpty) {
       return;
     }
     var cToken = headers["x-csrf-token"];
-    if(cToken != null) {
+    if (cToken != null) {
       csrfToken = cToken[0];
     }
-    if(headers.containsKey("set-cookie")) {
+    if (headers.containsKey("set-cookie")) {
       var cookie = headers["set-cookie"];
 
       ///uniquId is NOT a typo!
@@ -73,5 +69,4 @@ class CookieManagerImpl implements CookieManager {
   }
 
   void trigger() => _listeners.values.forEach((f) => f());
-
 }

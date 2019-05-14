@@ -16,8 +16,7 @@ class MashovApi {
 
   static ApiController getController() {
     if (_controller == null) {
-      _controller =
-          ApiController(CookieManagerImpl(), RequestControllerImpl());
+      _controller = ApiController(CookieManagerImpl(), RequestControllerImpl());
     }
     return _controller;
   }

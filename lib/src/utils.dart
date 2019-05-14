@@ -1,14 +1,12 @@
 import 'package:mashov_api/src/models.dart';
 
-
 ///Some nice utility functions
 class Utils {
-
   ///Returns an empty string if value is null, the value itself otherwise.
-  static String string(String value) => value ?? "";
+  static String string(dynamic value) => value != null ? "$value" : "";
 
   ///Returns 0 if value is null, the value itself otherwise.
-  static int Int(int value) => value ?? 0;
+  static int integer(int value) => value ?? 0;
 
   ///Returns false if value is null, the value itself otherwise.
   static bool boolean(bool value) => value ?? false;
@@ -39,4 +37,15 @@ class Utils {
   ///Turns headers into something a bit more readable.
   static Map<String, List<String>> decodeHeaders(Map<String, String> headers) =>
       headers.map((key, value) => MapEntry(key, value.split(';')));
+
+  //merges two maps, with an advantage to the first map(in case of same key and value,
+  //the value of the first map will be taken.
+  static Map<dynamic, dynamic> mergeMaps(Map<dynamic, dynamic> map1,
+      Map<dynamic, dynamic> map2) {
+    Map merged = Map.from(map1);
+    for (String key in map2.keys) {
+      merged.putIfAbsent(key, () => map2[key]);
+    }
+    return merged;
+  }
 }

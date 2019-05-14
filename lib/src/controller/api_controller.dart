@@ -51,7 +51,8 @@ class ApiController {
       _authList(_schoolsUrl, School.fromJson, Api.Schools);
 
   ///logs in to the Mashov API.
-  Future<Result<Login>> login(School school, String id, String password, int year) async {
+  Future<Result<Login>> login(School school, String id, String password,
+      int year) async {
     var body = {
       "school": {
         "semel": school.id,
@@ -78,8 +79,8 @@ class ApiController {
               exception: null, value: null, statusCode: response.statusCode);
         }
         processResponse(response);
-        Login login = Login.fromJson(
-            json.decode(utf8.decode(response.bodyBytes)));
+        Login login =
+        Login.fromJson(json.decode(utf8.decode(response.bodyBytes)));
         return Result(
             exception: null, value: login, statusCode: response.statusCode);
       }).catchError((e) => Result(exception: e, value: null, statusCode: -1));
@@ -105,8 +106,10 @@ class ApiController {
   Future<Result<MessagesCount>> getMessagesCount() =>
       _process(
           _auth(_messagesCountUrl, MessagesCount.fromJson, Api.MessagesCount),
-          Api.MessagesCount).then((r) =>
-          Result(exception: r.exception,
+          Api.MessagesCount)
+          .then((r) =>
+          Result(
+              exception: r.exception,
               statusCode: r.statusCode,
               value: r.value == null ? null : r.value as MessagesCount));
 
@@ -118,9 +121,12 @@ class ApiController {
 
   ///Returns a specific message.
   Future<Result<Message>> getMessage(String messageId) =>
-      _process(_auth(_messageUrl(messageId), Message.fromJson, Api.Message),
-          Api.Message).then((r) =>
-          Result(exception: r.exception,
+      _process(
+          _auth(_messageUrl(messageId), Message.fromJson, Api.Message),
+          Api.Message)
+          .then((r) =>
+          Result(
+              exception: r.exception,
               statusCode: r.statusCode,
               value: r.value == null ? null : r.value as Message));
 
@@ -134,7 +140,8 @@ class ApiController {
   ///The class group is a different address, so we use an id -1 to access it.
   Future<Result<List<Group>>> getGroups(String userId) =>
       _process(
-          _authList(_groupsUrl(userId), Group.fromJson, Api.Groups).then((groups) {
+          _authList(_groupsUrl(userId), Group.fromJson, Api.Groups).then((
+              groups) {
             groups.value.add(Group(id: -1, teacher: "", subject: "כיתה"));
             return groups;
           }),
@@ -148,7 +155,8 @@ class ApiController {
 
   ///Returns a list of Maakav reports.
   Future<Result<List<Maakav>>> getMaakav(String userId) =>
-      _process(_authList(_maakavUrl(userId), Maakav.fromJson, Api.Maakav),
+      _process(
+          _authList(_maakavUrl(userId), Maakav.fromJson, Api.Maakav),
           Api.Maakav);
 
   ///Returns a list of homework.
@@ -157,15 +165,38 @@ class ApiController {
           _authList(_homeworkUrl(userId), Homework.fromJson, Api.Homework),
           Api.Homework);
 
-  ///Returns a list of bagrut grades.
-  Future<Result<List<BagrutGrade>>> getBagrutGrades(String userId) =>
-      _process(_authList(
-          _bagrutGradesUrl(userId), BagrutGrade.fromJson, Api.BagrutGrades),
-          Api.BagrutGrades);
+  ///Returns a list of bagrut exams, combining both dates, times, room and grades.
+  ///This will NOT go through raw data processor as it takes the data
+  ///from two sources.
+  Future<Result<List<Bagrut>>> getBagrut(String userId) async {
+    try {
+      Map<String, String> headers = jsonHeader;
+      List gradesMaps = await _requestController
+          .get(_bagrutGradesUrl(userId), headers)
+          .then((response) => json.decode(response.body));
+      List timesMaps = await _requestController
+          .get(_bagrutTimeUrl(userId), headers)
+          .then((response) => json.decode(response.body));
+      List<Map> maps = [];
+      gradesMaps.forEach((g) {
+        int semel = Utils.integer(g["semel"]);
+        Map matchingTime = timesMaps.firstWhere((m) =>
+        Utils.integer(m["semel"]) == semel, orElse: () => null);
+        maps.add(matchingTime == null ? g : Utils.mergeMaps(g, matchingTime));
+      });
+      List<Bagrut> bagrut = maps.map((m) => Bagrut.fromJson(m)).toList();
+      if (_dataProcessor != null) _dataProcessor(bagrut, Api.Bagrut);
+      return Result<List<Bagrut>>(
+          exception: null, value: bagrut, statusCode: 200);
+    } catch (e) {
+      return Result(exception: e, value: null, statusCode: 200);
+    }
+  }
 
   //Returns the user's hatamot.
   Future<Result<List<Hatama>>> getHatamot(String userId) =>
-      _process(_authList(_hatamotUrl(userId), Hatama.fromJson, Api.Hatamot),
+      _process(
+          _authList(_hatamotUrl(userId), Hatama.fromJson, Api.Hatamot),
           Api.Hatamot);
 
   ///Returns the user profile.
@@ -251,8 +282,8 @@ class ApiController {
       Api api) {
     try {
       List src = json.decode(response.body);
-      Result<List<E>> result =
-      Result(exception: null,
+      Result<List<E>> result = Result(
+          exception: null,
           value: src.map<E>((e) => parser(e)).toList(),
           statusCode: response.statusCode);
       //if it had not crashed, we know the data is good.
@@ -301,6 +332,9 @@ class ApiController {
 
   static String _bagrutGradesUrl(String userId) =>
       _baseUrl + "students/$userId/bagrut/grades";
+
+  static String _bagrutTimeUrl(String userId) =>
+      _baseUrl + "students/$userId/bagrut/sheelonim";
 
   static String _hatamotUrl(String userId) =>
       _baseUrl + "students/$userId/hatamot";
@@ -368,11 +402,6 @@ class ApiController {
         _dataProcessor(data, api);
       }
     }
-    /*if(api == Api.Message) {
-      return Future.wait(<Future>[data]).then((values) => values.first as Result<Message>);
-    } else if(api == Api.MessagesCount) {
-      return Future.wait(<Future>[data]).then((values) => values.first as Result<MessagesCount>);
-    }*/
     return data;
   }
 }
@@ -381,7 +410,7 @@ enum Api {
   Schools,
   Login,
   Grades,
-  BagrutGrades,
+  Bagrut,
   BehaveEvents,
   Groups,
   Timetable,

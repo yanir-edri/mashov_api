@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'package:mashov_api/src/controller/request_controller.dart';
 
-
 class RequestControllerImpl implements RequestController {
   RequestControllerImpl();
 

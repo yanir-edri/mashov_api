@@ -26,7 +26,6 @@ class Result<E> {
   bool get isForbidden => statusCode == 403;
 
   bool get isOk => statusCode == 200;
-
 }
 
 //login
@@ -43,7 +42,8 @@ class School {
   static School fromJson(Map<String, dynamic> json) => School(
       id: json['semel'], name: json['name'], years: json['years'].cast<int>());
 
-  static List<School> ListFromJson(String src) => (json.decode(src) as List)
+  static List<School> listFromJson(String src) =>
+      (json.decode(src) as List)
       .map((school) => School.fromJson(school))
       .toList();
 
@@ -137,7 +137,6 @@ class Login {
     }
   }
 
-
   static listToStringsList(List list) {
     List<String> strings = new List(list.length);
     for (int i = 0; i < list.length; i++) {
@@ -193,7 +192,6 @@ class MessageTitle {
 //    "hasAttachments": $hasAttachment
 //    }""";
 //  }
-
 
   @override
   String toString() {
@@ -276,10 +274,10 @@ class MessagesCount {
         this.unreadMessages});
 
   static MessagesCount fromJson(Map<String, dynamic> src) => MessagesCount(
-      allMessages: Utils.Int(src["allMessages"]),
-      inboxMessages: Utils.Int(src["inboxMessages"]),
-      newMessages: Utils.Int(src["newMessages"]),
-      unreadMessages: Utils.Int(src["unreadMessages"]));
+      allMessages: Utils.integer(src["allMessages"]),
+      inboxMessages: Utils.integer(src["inboxMessages"]),
+      newMessages: Utils.integer(src["newMessages"]),
+      unreadMessages: Utils.integer(src["unreadMessages"]));
 
   @override
   String toString() {
@@ -291,26 +289,48 @@ class MessagesCount {
 //end messages
 
 //everything else
-
-class BagrutGrade {
-  String semel, name, date;
+class Bagrut {
+  String semel, name, moed, date, room, examStartTime, examEndTime;
   int finalGrade, yearGrade, testGrade;
 
-  BagrutGrade(
+  Bagrut(
       {this.semel,
         this.name,
         this.date,
+        this.moed,
+        this.examStartTime,
+        this.examEndTime,
+        this.room,
         this.finalGrade,
         this.yearGrade,
         this.testGrade});
 
-  static BagrutGrade fromJson(Map<String, dynamic> src) => BagrutGrade(
-      semel: Utils.Int(src["semel"]).toString(),
+  String stringify() => """{
+  semel:      $semel,
+  name:       $name,
+  date:       $date,
+  moed:       $moed,
+  room:       $room,
+  finalGrade: $finalGrade,
+  yearGrade:  $yearGrade,
+  testGrade:  $testGrade,
+  times:      $examStartTime-$examEndTime,
+  
+  }""";
+
+  static Bagrut fromJson(Map<dynamic, dynamic> src) =>
+      Bagrut(
+          semel: Utils.string(src["semel"]),
       name: Utils.string(src["name"]),
-      date: Utils.string(src["moed"]),
-      finalGrade: Utils.Int(src["final"]),
-      yearGrade: Utils.Int(src["shnaty"]),
-      testGrade: Utils.Int(src["test"]));
+          date: Utils.string(src["examDate"]),
+          moed: Utils.string(src["moed"]),
+          room: Utils.string(src["examRoomNumber"]),
+          examStartTime: Utils.string(src["examStartTime"]),
+          examEndTime: Utils.string(src["examEndTime"]),
+          finalGrade: Utils.integer(src["final"]),
+          yearGrade: Utils.integer(src["shnaty"]),
+          testGrade: Utils.integer(src["test"]));
+
 }
 
 class BehaveEvent {
@@ -330,12 +350,12 @@ class BehaveEvent {
         this.subject});
 
   static BehaveEvent fromJson(Map<String, dynamic> src) => BehaveEvent(
-      groupId: Utils.Int(src["groupId"]),
-      lesson: Utils.Int(src["lesson"]),
+      groupId: Utils.integer(src["groupId"]),
+      lesson: Utils.integer(src["lesson"]),
       date: DateTime.parse(src["lessonDate"]),
-      type: Utils.Int(src["lessonType"]),
+      type: Utils.integer(src["lessonType"]),
       text: Utils.string(src["achvaName"]),
-      justificationId: Utils.Int(src["justificationId"]),
+      justificationId: Utils.integer(src["justificationId"]),
       justification: Utils.string(src["justification"]),
       reporter: Utils.string(src["reporter"]),
       subject: Utils.string(src["subject"]));
@@ -365,12 +385,15 @@ class Lesson {
     bool tableDataNull = tableData == null;
     bool detailsNull = details == null;
     return Lesson(
-        groupId: Utils.Int(tableDataNull ? null : tableData["groupId"]),
-        day: Utils.Int(tableDataNull ? null : tableData["day"]),
-        hour: Utils.Int(tableDataNull ? null : tableData["lesson"]),
+        groupId: Utils.integer(tableDataNull ? null : tableData["groupId"]),
+        day: Utils.integer(tableDataNull ? null : tableData["day"]),
+        hour: Utils.integer(tableDataNull ? null : tableData["lesson"]),
         subject: Utils.string(detailsNull ? null : details["subjectName"]),
-        teachers: detailsNull ? null : details["groupTeachers"].map<String>((
-            t) => "${t["teacherName"]}").toList(),
+        teachers: detailsNull
+            ? null
+            : details["groupTeachers"]
+            .map<String>((t) => "${t["teacherName"]}")
+            .toList(),
         room: Utils.string(tableDataNull ? null : tableData["roomNum"]));
   }
 
@@ -398,12 +421,12 @@ class Grade {
   static Grade fromJson(Map<String, dynamic> src) {
     return Grade(
         teacher: Utils.string(src["teacherName"]),
-        groupId: Utils.Int(src["groupId"]),
+        groupId: Utils.integer(src["groupId"]),
         subject: Utils.string(src["subjectName"]),
         eventDate: DateTime.parse(src["eventDate"]),
         event: Utils.string(src["gradingEvent"]),
-        type: Utils.Int(src["gradeTypeId"]),
-        grade: Utils.Int(src["grade"]));
+        type: Utils.integer(src["gradeTypeId"]),
+        grade: Utils.integer(src["grade"]));
   }
 
   static List<Grade> fromJsonArray(List<dynamic> src) =>
@@ -423,7 +446,7 @@ class Group {
   Group({this.id, this.subject, this.teacher});
 
   static Group fromJson(Map<String, dynamic> src) => Group(
-      id: Utils.Int(src["groupId"]),
+      id: Utils.integer(src["groupId"]),
       subject: Utils.string(src["fullSubjectName"]),
       teacher: Utils.string(src["teacherName"]));
 
@@ -451,7 +474,7 @@ class Contact {
             Utils.string(src["familyName"]),
         phone: Utils.string(src["cellphone"]),
         parentClass: Utils.string(src["classCode"]) +
-            Utils.Int(src["classNum"]).toString(),
+            Utils.integer(src["classNum"]).toString(),
         address: street +
             (city.isEmpty ? "" : (street.isEmpty ? city : ", " + city)));
   }
@@ -468,7 +491,7 @@ class Hatama {
   Hatama({this.code, this.name});
 
   static Hatama fromJson(Map<String, dynamic> src) =>
-      Hatama(code: Utils.Int(src["code"]), name: Utils.string(src["name"]));
+      Hatama(code: Utils.integer(src["code"]), name: Utils.string(src["name"]));
 }
 
 class Homework {
@@ -491,9 +514,10 @@ class Maakav {
   Maakav({this.id, this.date, this.message, this.reporter, this.attachments});
 
   static Maakav fromJson(Map<String, dynamic> src) => Maakav(
-      id: Utils.Int(src["maakavId"]).toString(),
+      id: Utils.integer(src["maakavId"]).toString(),
       date: DateTime.parse(src["maakavDate"]),
       message: Utils.string(src["message"]),
       reporter: Utils.string(src["reporterName"]),
       attachments: Utils.attachments(src["filesMetadata"]));
 }
+
