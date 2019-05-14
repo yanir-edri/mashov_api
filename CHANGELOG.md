@@ -21,9 +21,9 @@
 * Updated timetable API
 ## 0.0.11 - 0.0.13
 * Messed up and fixed students API
-# 0.1.0
+## 0.1.0
 * Fixed messages count and get message not working because of implicit type conversions
-# 0.2.0
+## 0.3.0
 * Moved bagrut grades into a bigger model called Bagrut which includes time, date and room too.
   Bagrut grades will no longer pass through raw data processor, as they require two different requests.
   They will still pass through the data processor.
