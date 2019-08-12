@@ -28,3 +28,5 @@
   Bagrut grades will no longer pass through raw data processor, as they require two different requests.
   They will still pass through the data processor.
 * Added a changelog.
+## 0.3.0+1
+* Updated API version
