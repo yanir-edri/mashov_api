@@ -330,7 +330,6 @@ class Bagrut {
           finalGrade: Utils.integer(src["final"]),
           yearGrade: Utils.integer(src["shnaty"]),
           testGrade: Utils.integer(src["test"]));
-
 }
 
 class BehaveEvent {
@@ -371,6 +370,7 @@ class Lesson {
   int groupId, day, hour;
   String subject, room;
   List<String> teachers;
+
   Lesson(
       {this.groupId,
         this.day,
@@ -486,12 +486,29 @@ class Contact {
 
 class Hatama {
   int code;
-  String name;
+  String name, remark;
 
-  Hatama({this.code, this.name});
+  Hatama({this.code, this.name, this.remark});
 
   static Hatama fromJson(Map<String, dynamic> src) =>
-      Hatama(code: Utils.integer(src["code"]), name: Utils.string(src["name"]));
+      Hatama(
+          code: Utils.integer(src["code"]),
+          name: Utils.string(src["name"]),
+          remark: Utils.string(src["remark"]));
+}
+
+class HatamatBagrut {
+  String hatama, moed, name, semel;
+
+  HatamatBagrut({this.hatama, this.moed, this.name, this.semel});
+
+  static HatamatBagrut fromJson(Map<String, dynamic> src) =>
+      HatamatBagrut(
+          hatama: Utils.string(src["hatama"]),
+          moed: Utils.string(src["moed"]),
+          name: Utils.string(src["name"]),
+          semel: Utils.string(src["semel"])
+      );
 }
 
 class Homework {
@@ -520,4 +537,3 @@ class Maakav {
       reporter: Utils.string(src["reporterName"]),
       attachments: Utils.attachments(src["filesMetadata"]));
 }
-

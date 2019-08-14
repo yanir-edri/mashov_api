@@ -30,3 +30,5 @@
 * Added a changelog.
 ## 0.3.0+1
 * Updated API version
+## 0.3.0+2
+* Added Hatamot Bagrut.

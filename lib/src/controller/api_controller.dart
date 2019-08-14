@@ -180,8 +180,9 @@ class ApiController {
       List<Map> maps = [];
       gradesMaps.forEach((g) {
         int semel = Utils.integer(g["semel"]);
-        Map matchingTime = timesMaps.firstWhere((m) =>
-        Utils.integer(m["semel"]) == semel, orElse: () => null);
+        Map matchingTime = timesMaps.firstWhere(
+                (m) => Utils.integer(m["semel"]) == semel,
+            orElse: () => null);
         maps.add(matchingTime == null ? g : Utils.mergeMaps(g, matchingTime));
       });
       List<Bagrut> bagrut = maps.map((m) => Bagrut.fromJson(m)).toList();
@@ -199,7 +200,14 @@ class ApiController {
           _authList(_hatamotUrl(userId), Hatama.fromJson, Api.Hatamot),
           Api.Hatamot);
 
-  ///Returns the user profile.
+  //Returns the user's Hatamot bagrut.
+  Future<Result<List<HatamatBagrut>>> getHatamotBagrut(String userId) =>
+      _process(
+          _authList(_hatamotBagrutUrl(userId), HatamatBagrut.fromJson,
+              Api.HatamotBagrut),
+          Api.HatamotBagrut);
+
+  ///Returns the user profile picture into given file parameter.
   Future<File> getPicture(String userId, File file) {
     Map<String, String> headers = jsonHeader;
     headers.addAll(_authHeader());
@@ -230,6 +238,7 @@ class ApiController {
         .then((attachment) => file.writeAsBytes(attachment));
   }
 
+  //Returns a given maakav attachment.
   Future<File> getMaakavAttachment(String maakavId, String userId,
       String fileId, String name, File file) {
     Map<String, String> headers = jsonHeader;
@@ -339,6 +348,9 @@ class ApiController {
   static String _hatamotUrl(String userId) =>
       _baseUrl + "students/$userId/hatamot";
 
+  static String _hatamotBagrutUrl(String userId) =>
+      _baseUrl + "students/$userId/bagrut/hatamot";
+
   static String _behaveUrl(String userId) =>
       _baseUrl + "students/$userId/behave";
 
@@ -421,5 +433,6 @@ enum Api {
   MessagesCount,
   Maakav,
   Homework,
-  Hatamot
+  Hatamot,
+  HatamotBagrut
 }
