@@ -130,6 +130,9 @@ class ApiController {
               statusCode: r.statusCode,
               value: r.value == null ? null : r.value as Message));
 
+  Future<Result<List<Bell>>> getBells() =>
+      _process(_authList(_bellsUrl, Bell.fromJson, Api.Bells), Api.Bells);
+
   ///Returns the user timetable.
   Future<Result<List<Lesson>>> getTimeTable(String userId) =>
       _process(
@@ -363,6 +366,8 @@ class ApiController {
   static String _timetableUrl(String userId) =>
       _baseUrl + "students/$userId/timetable";
 
+  static const String _bellsUrl = _baseUrl + "bells";
+
   static String _groupsUrl(String userId) =>
       _baseUrl + "students/$userId/groups";
 
@@ -426,6 +431,7 @@ enum Api {
   BehaveEvents,
   Groups,
   Timetable,
+  Bells,
   Alfon,
   Messages,
   Message,

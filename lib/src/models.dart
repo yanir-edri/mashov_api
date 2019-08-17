@@ -366,6 +366,23 @@ class BehaveEvent {
   }
 }
 
+class Bell {
+  String lessonNumber, startTime, endTime;
+
+  Bell({this.lessonNumber, this.startTime, this.endTime});
+
+  static Bell fromJson(Map<String, dynamic> src) {
+    return Bell(
+        lessonNumber: Utils.string(src["lessonNumber"]),
+        startTime: Utils.string(src["startTime"]),
+        endTime: Utils.string(src["endTime"]));
+  }
+
+  @override
+  String toString() =>
+      "Bell(lessonNumber: $lessonNumber, startTime: $startTime, endTime: $endTime)";
+}
+
 class Lesson {
   int groupId, day, hour;
   String subject, room;
@@ -507,8 +524,7 @@ class HatamatBagrut {
           hatama: Utils.string(src["hatama"]),
           moed: Utils.string(src["moed"]),
           name: Utils.string(src["name"]),
-          semel: Utils.string(src["semel"])
-      );
+          semel: Utils.string(src["semel"]));
 }
 
 class Homework {
