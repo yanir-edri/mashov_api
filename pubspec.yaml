@@ -2,7 +2,7 @@ name: mashov_api
 description: "The Mashov API - for Flutter.
 This is a dart API for the [Mashov (for students)](https://www.mashov.info/),
 to be used in a Mashov app."
-version: 0.3.0+2
+version: 0.3.0+3
 author: Yanir Edri <yanir.edri1@gmail.com>
 homepage: https://github.com/yanir-edri/mashov_api
 

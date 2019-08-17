@@ -32,3 +32,5 @@
 * Updated API version
 ## 0.3.0+2
 * Added Hatamot Bagrut.
+## 0.3.0+3
+* Added Bells.
