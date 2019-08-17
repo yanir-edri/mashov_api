@@ -46,6 +46,7 @@ class ApiController {
     _dataProcessor = null;
   }
 
+
   ///returns a list of schools.
   Future<Result<List<School>>> getSchools() =>
       _authList(_schoolsUrl, School.fromJson, Api.Schools);
@@ -130,14 +131,42 @@ class ApiController {
               statusCode: r.statusCode,
               value: r.value == null ? null : r.value as Message));
 
-  Future<Result<List<Bell>>> getBells() =>
-      _process(_authList(_bellsUrl, Bell.fromJson, Api.Bells), Api.Bells);
-
   ///Returns the user timetable.
-  Future<Result<List<Lesson>>> getTimeTable(String userId) =>
-      _process(
-          _authList(_timetableUrl(userId), Lesson.fromJson, Api.Timetable),
-          Api.Timetable);
+  Future<Result<List<Lesson>>> getTimeTable(String userId) async {
+//    try {
+    Map<String, String> headers = _authHeader();
+    List lessonsMap = await _requestController.get(
+        _timetableUrl(userId), headers)
+        .then((response) {
+      return json.decode(response.body);
+    });
+    List bellsMap = await _requestController.get(_bellsUrl, headers).then((
+        response) {
+      return json.decode(response.body);
+    });
+    List maps = [];
+    lessonsMap.forEach((l) {
+      int num = l["timeTable"]["lesson"];
+      Map matchingBell = bellsMap.firstWhere((m) =>
+      Utils.integer(m["lessonNumber"]) == num, orElse: () => null);
+      if (matchingBell == null) {
+        print(
+            "we've got a serious error here: no bell matched for lesson number $num, bells length is ${bellsMap
+                .length}");
+      }
+      maps.add(matchingBell == null ? l : Utils.mergeMaps(l, {
+        "startTime": matchingBell["startTime"],
+        "endTime": matchingBell["endTime"]
+      }));
+    });
+    List<Lesson> timetable = maps.map((m) => Lesson.fromJson(m)).toList();
+    if (_dataProcessor != null) _dataProcessor(timetable, Api.Timetable);
+    return Result<List<Lesson>>(
+        exception: null, value: timetable, statusCode: 200);
+//    } catch(e) {
+//      return Result(exception: e, value: null, statusCode: 200);
+//    }
+  }
 
   ///Returns a list of the Alfon Groups.
   ///The class group is a different address, so we use an id -1 to access it.
@@ -173,7 +202,7 @@ class ApiController {
   ///from two sources.
   Future<Result<List<Bagrut>>> getBagrut(String userId) async {
     try {
-      Map<String, String> headers = jsonHeader;
+      Map<String, String> headers = _authHeader();
       List gradesMaps = await _requestController
           .get(_bagrutGradesUrl(userId), headers)
           .then((response) => json.decode(response.body));
@@ -212,7 +241,7 @@ class ApiController {
 
   ///Returns the user profile picture into given file parameter.
   Future<File> getPicture(String userId, File file) {
-    Map<String, String> headers = jsonHeader;
+    Map<String, String> headers = _authHeader();
     headers.addAll(_authHeader());
     return _requestController
         .get(_pictureUrl(userId), headers)
@@ -233,7 +262,7 @@ class ApiController {
   ///and called as the actual attachment name.
   Future<File> getAttachment(String messageId, String fileId, String name,
       File file) {
-    Map<String, String> headers = jsonHeader;
+    Map<String, String> headers = _authHeader();
     headers.addAll(_authHeader());
     return _requestController
         .get(_attachmentUrl(messageId, fileId, name), headers)
@@ -244,7 +273,7 @@ class ApiController {
   //Returns a given maakav attachment.
   Future<File> getMaakavAttachment(String maakavId, String userId,
       String fileId, String name, File file) {
-    Map<String, String> headers = jsonHeader;
+    Map<String, String> headers = _authHeader();
     headers.addAll(_authHeader());
     return _requestController
         .get(_maakavAttachmentUrl(maakavId, userId, fileId, name), headers)
@@ -255,7 +284,7 @@ class ApiController {
   ///Returns a list of E, using an authenticated request.
   Future<Result<List<E>>> _authList<E>(String url, Parser<E> parser,
       Api api) async {
-    Map<String, String> headers = jsonHeader;
+    Map<String, String> headers = _authHeader();
     if (url != _schoolsUrl) {
       /// we don't need authentication when getting schools.
       headers.addAll(_authHeader());
@@ -268,7 +297,7 @@ class ApiController {
 
   ///Returns E, using an authenticated request.
   Future<Result<E>> _auth<E>(String url, Parser parser, Api api) async {
-    Map<String, String> headers = jsonHeader;
+    Map<String, String> headers = _authHeader();
     headers.addAll(_authHeader());
     return _requestController
         .get(url, headers)
@@ -314,7 +343,8 @@ class ApiController {
 
   ///The authentication header.
   Map<String, String> _authHeader() {
-    Map<String, String> headers = Map();
+    Map<String, String> headers = Map()
+      ..addAll(jsonHeader);
 
     ///uniquId is NOT a typo!
     ///I...I really don't know why they named it that way.
@@ -408,8 +438,6 @@ class ApiController {
       if (data is Future<Result>) {
         data.then((result) {
           if (result.isSuccess) {
-//            print(
-//                "result was successful in process: ${result.value.toString()}");
             _dataProcessor(result.value, api);
           }
         });
@@ -431,7 +459,6 @@ enum Api {
   BehaveEvents,
   Groups,
   Timetable,
-  Bells,
   Alfon,
   Messages,
   Message,

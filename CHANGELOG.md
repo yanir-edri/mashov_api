@@ -34,3 +34,5 @@
 * Added Hatamot Bagrut.
 ## 0.3.0+3
 * Added Bells.
+## 0.4.0
+Breaking changes - Lesson is now combined with Bell.

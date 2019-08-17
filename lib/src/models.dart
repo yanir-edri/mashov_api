@@ -220,7 +220,6 @@ class Message {
         this.attachments});
 
   static Message fromJson(Map<String, dynamic> src) {
-    print("attachments is of type ${src["files"].runtimeType}");
     return Message(
         messageId: Utils.string(src["messageId"]),
         sendDate: DateTime.parse(src["sendTime"]),
@@ -366,37 +365,23 @@ class BehaveEvent {
   }
 }
 
-class Bell {
-  String lessonNumber, startTime, endTime;
-
-  Bell({this.lessonNumber, this.startTime, this.endTime});
-
-  static Bell fromJson(Map<String, dynamic> src) {
-    return Bell(
-        lessonNumber: Utils.string(src["lessonNumber"]),
-        startTime: Utils.string(src["startTime"]),
-        endTime: Utils.string(src["endTime"]));
-  }
-
-  @override
-  String toString() =>
-      "Bell(lessonNumber: $lessonNumber, startTime: $startTime, endTime: $endTime)";
-}
 
 class Lesson {
   int groupId, day, hour;
-  String subject, room;
+  String subject, room, startTime, endTime;
   List<String> teachers;
 
   Lesson(
       {this.groupId,
         this.day,
         this.hour,
+        this.startTime,
+        this.endTime,
         this.subject,
         this.teachers,
         this.room});
 
-  static Lesson fromJson(Map<String, dynamic> src) {
+  static Lesson fromJson(Map<dynamic, dynamic> src) {
     var tableData = src["timeTable"];
     var details = src["groupDetails"];
     bool tableDataNull = tableData == null;
@@ -405,6 +390,8 @@ class Lesson {
         groupId: Utils.integer(tableDataNull ? null : tableData["groupId"]),
         day: Utils.integer(tableDataNull ? null : tableData["day"]),
         hour: Utils.integer(tableDataNull ? null : tableData["lesson"]),
+        startTime: Utils.string(src["startTime"]),
+        endTime: Utils.string(src["endTime"]),
         subject: Utils.string(detailsNull ? null : details["subjectName"]),
         teachers: detailsNull
             ? null
@@ -417,7 +404,8 @@ class Lesson {
   @override
   String toString() =>
       super.toString() +
-          " => { $groupId, $day, $hour, $subject, ${teachers.join(
+          " => { $groupId, $day, $hour,${startTime}-${endTime},$subject, ${teachers
+              .join(
               ", ")}, $room }";
 }
 
