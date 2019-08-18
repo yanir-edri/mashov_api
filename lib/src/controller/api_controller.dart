@@ -175,7 +175,7 @@ class ApiController {
         _groupsUrl(userId), Group.fromJson, Api.Groups);
     groups.value.add(Group(id: -1, teachers: [], subject: "כיתת אם"));
     if (_dataProcessor != null) {
-      _dataProcessor(groups, Api.Groups);
+      _dataProcessor(groups.value, Api.Groups);
     }
     return groups;
   }

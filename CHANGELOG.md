@@ -38,3 +38,5 @@
 Breaking changes - Lesson is now combined with Bell.
 ## 0.5.0
 Fixed contacts API
+## 0.5.1
+Fixed it once again
