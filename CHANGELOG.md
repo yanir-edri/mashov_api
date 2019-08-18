@@ -36,3 +36,5 @@
 * Added Bells.
 ## 0.4.0
 Breaking changes - Lesson is now combined with Bell.
+## 0.5.0
+Fixed contacts API
