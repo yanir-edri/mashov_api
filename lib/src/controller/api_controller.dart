@@ -170,14 +170,15 @@ class ApiController {
 
   ///Returns a list of the Alfon Groups.
   ///The class group is a different address, so we use an id -1 to access it.
-  Future<Result<List<Group>>> getGroups(String userId) =>
-      _process(
-          _authList(_groupsUrl(userId), Group.fromJson, Api.Groups).then((
-              groups) {
-            groups.value.add(Group(id: -1, teacher: "", subject: "כיתה"));
-            return groups;
-          }),
-          Api.Groups);
+  Future<Result<List<Group>>> getGroups(String userId) async {
+    Result<List<Group>> groups = await _authList<Group>(
+        _groupsUrl(userId), Group.fromJson, Api.Groups);
+    groups.value.add(Group(id: -1, teachers: [], subject: "כיתת אם"));
+    if (_dataProcessor != null) {
+      _dataProcessor(groups, Api.Groups);
+    }
+    return groups;
+  }
 
   ///returns an Alfon Group contacts.
   Future<Result<List<Contact>>> getContacts(String userId, String groupId) =>

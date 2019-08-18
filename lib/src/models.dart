@@ -365,7 +365,6 @@ class BehaveEvent {
   }
 }
 
-
 class Lesson {
   int groupId, day, hour;
   String subject, room, startTime, endTime;
@@ -405,8 +404,7 @@ class Lesson {
   String toString() =>
       super.toString() +
           " => { $groupId, $day, $hour,${startTime}-${endTime},$subject, ${teachers
-              .join(
-              ", ")}, $room }";
+              .join(", ")}, $room }";
 }
 
 class Grade {
@@ -446,23 +444,28 @@ class Grade {
 
 class Group {
   int id;
-  String subject, teacher;
+  String subject;
+  List<String> teachers;
 
-  Group({this.id, this.subject, this.teacher});
+  Group({this.id, this.subject, this.teachers}) {
+    if (teachers == null) teachers = List();
+  }
 
   static Group fromJson(Map<String, dynamic> src) => Group(
-      id: Utils.integer(src["groupId"]),
-      subject: Utils.string(src["fullSubjectName"]),
-      teacher: Utils.string(src["teacherName"]));
+    id: Utils.integer(src["groupId"]),
+    subject: Utils.string(src["subjectName"]).replaceAll("''", "\""),
+    teachers: src["groupTeachers"]
+        .map<String>((t) => "${t["teacherName"]}")
+        .toList(),
+  );
 
   @override
   String toString() =>
       super.toString() +
           " => { id: $id, $subject" +
-          (teacher.isNotEmpty ? " - $teacher " : "") +
+          (teachers.isNotEmpty ? " - [${teachers.join(", ",)}]" : "") +
           " }";
 
-  String format() => "$subject" + (teacher.isNotEmpty ? " - $teacher " : "");
 }
 
 class Contact {
